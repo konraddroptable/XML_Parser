@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Schema;
 using XMLParser;
 
 namespace XMLParser
@@ -16,9 +18,17 @@ namespace XMLParser
     public partial class Form1 : Form
     {
         XDocument xml = new XDocument();
+        XmlDocument loadedXml = new XmlDocument();
+        string xmlPath = "none";
+        string xsdPath = "none";
+
+
         public Form1()
         {
             InitializeComponent();
+            lblXml.Text = string.Empty;
+            lblXsd.Text = string.Empty;
+
             StationsList station = new StationsList();
 
 
@@ -34,15 +44,21 @@ namespace XMLParser
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Timetable timetable = new Timetable();
-            int idFrom = FindStationByName(stationFrom.SelectedItem.ToString());
-            int idTo = -1;
-            idTo = FindStationByName(stationTo.SelectedItem.ToString());
-            int hour = (int)fromHour.SelectedItem;
+            try
+            {
+                Timetable timetable = new Timetable();
+                int idFrom = FindStationByName(stationFrom.SelectedItem.ToString());
+                int idTo = -1;
+                idTo = FindStationByName(stationTo.SelectedItem.ToString());
+                int hour = (int)fromHour.SelectedItem;
 
-
-            xml = timetable.Scraper(idFrom, idTo, true, hour);
-            MessageBox.Show("Zakończono pobieranie", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                xml = timetable.Scraper(idFrom, idTo, true, hour);
+                MessageBox.Show("Zakończono pobieranie", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (NullReferenceException)
+            {
+                MessageBox.Show("Błąd podczas pobierania pliku!", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -102,18 +118,60 @@ namespace XMLParser
 
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
-                xml.Save(saveFileDialog.FileName);
+                try
+                {
+                    xml.Save(saveFileDialog.FileName);
+                }
+                catch (InvalidOperationException)
+                {
+                    MessageBox.Show("Nie wygenerowano wcześniej pliku XML", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            Validation validation = new Validation();
-            MessageBox.Show(validation.ValidateXml());
+            Validation val = new Validation();
+            ErrorsCount ec = new ErrorsCount();
+            try
+            {
+                ec = val.ValidateXmlDocument(xmlPath, xsdPath);
+                string msg = ec.validationFlag ? "Walidacja zakończona powodzeniem" : "Walidacja zakończona niepowodzeniem";
+                string msg2 = "\n\nLiczba błędów: " + ec.errorsCount.ToString() + "\nLiczba ostrzeżeń: " + ec.warningsCount.ToString();
 
+                MessageBox.Show(msg + msg2, "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (FileNotFoundException ex){
+                MessageBox.Show("Nie załadowano pliku z XML lub XSD!", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private string LoadFile(string dialogFilter, string dialogTitle)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = dialogFilter;
+            openFileDialog.Title = dialogTitle;
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+                return openFileDialog.FileName.ToString();
+            else
+                return string.Empty;
+        }
+
+        private void loadXmlBtn_Click(object sender, EventArgs e)
+        {
+            xmlPath = LoadFile(@"XML Document |*.xml", @"Wybierz dokument XML do walidacji");
+            if (xmlPath != "none")
+                lblXml.Text = "Załadowano plik";
+        }
+
+        private void loadXsdBtn_Click(object sender, EventArgs e)
+        {
+            xsdPath = LoadFile(@"XSD Document |*.xsd", @"Wybierz dokument XSD do walidacji");
+            if(xsdPath != "none")
+                lblXsd.Text = "Załadowano plik";
         }
 
 
-        
     }
 }

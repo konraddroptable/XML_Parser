@@ -12,47 +12,47 @@ namespace XMLParser
 {
     class Validation
     {
-        public string ValidateXml()
+        private List<string> TheSchemaErrors;
+        private List<string> TheSchemaWarnings;
+
+        public ErrorsCount ValidateXmlDocument(string xmlPath, string xsdPath)
         {
-            string xsdMarkup =
-                        @"<xsd:schema xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
-               <xsd:element name='root'>
-                <xsd:complexType>
-                 <xsd:sequence>
-                  <xsd:element name='Child1' minOccurs='1' maxOccurs='1'/>
-                  <xsd:element name='Child2' minOccurs='1' maxOccurs='1'/>
-                 </xsd:sequence>
-                </xsd:complexType>
-               </xsd:element>
-              </xsd:schema>";
-            XmlSchemaSet schemas = new XmlSchemaSet();
-            schemas.Add("", XmlReader.Create(new StringReader(xsdMarkup)));
+            XmlDocument doc = new XmlDocument();
+            doc.Load(xmlPath);
+            doc.Schemas.Add("", xsdPath);
+            doc.Schemas.Compile();
+            TheSchemaErrors = new List<string>();
+            TheSchemaWarnings = new List<string>();
+            doc.Validate(Xml_ValidationEventHandler);
 
-            XDocument doc1 = new XDocument(
-                new XElement("Root",
-                    new XElement("Child1", "content1"),
-                    new XElement("Child2", "content1")
-                )
-            );
+            ErrorsCount ec = new ErrorsCount();
+            ec.errorsCount = TheSchemaErrors.Count;
+            ec.warningsCount = TheSchemaWarnings.Count;
+            if (ec.errorsCount > 0)
+                ec.validationFlag = false;
+            else
+                ec.validationFlag = true;
 
-            XDocument doc2 = new XDocument(
-                new XElement("Root",
-                    new XElement("Child1", "content1"),
-                    new XElement("Child3", "content1")
-                )
-            );
-
-            bool errors = false;
-            doc2.Validate(schemas, (o, e) =>
-            {
-                Console.WriteLine("{0}", e.Message);
-                errors = true;
-            });
-
-            string valid = errors ? "did not validate" : "validated";
-
-            return valid;
+            return ec;
         }
+
+        private void Xml_ValidationEventHandler(object sender, ValidationEventArgs e)
+        {
+            switch (e.Severity)
+            {
+                case XmlSeverityType.Error: TheSchemaErrors.Add(e.Message); break;
+                case XmlSeverityType.Warning: TheSchemaWarnings.Add(e.Message); break;
+            }
+        }
+
         
+        
+    }
+
+    class ErrorsCount
+    {
+        public int errorsCount;
+        public int warningsCount;
+        public bool validationFlag;
     }
 }
