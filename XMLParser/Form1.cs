@@ -141,8 +141,9 @@ namespace XMLParser
 
                 MessageBox.Show(msg + msg2, "", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            catch (FileNotFoundException ex){
-                MessageBox.Show("Nie załadowano pliku z XML lub XSD!", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            catch (Exception ex){
+                if(ex is FileNotFoundException || ex is ArgumentException)
+                    MessageBox.Show("Nie załadowano pliku z XML lub XSD!", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
