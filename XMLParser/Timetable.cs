@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using HtmlAgilityPack;
 using System.Xml.Linq;
 using System.Xml;
+using System.Globalization;
 
 namespace XMLParser
 {
@@ -146,13 +147,42 @@ namespace XMLParser
 
         private void XmlAddStationsInfo(XDocument xml, int idStart, int idEnd)
         {
+            //string day, month, year;
+            //day = date.Year.ToString("dd");
+            //month = date.Month.ToString("MM");
+            //year = date.Year.ToString("yyyy");
+
+            //prepare date for url
+            DateTime date = new DateTime();
+            date = DateTime.Now;
+            bool isWeekend = (int)date.DayOfWeek == 0 || (int)date.DayOfWeek == 5 ? true : false;
+
             xml.Element("root").Add(new XElement("stations", new XElement("from",
                                                                  new XElement("id", idStart),
                                                                  new XElement("name", FindStationById(idStart))),
                                                              new XElement("to",
                                                                  new XElement("id", idEnd),
                                                                  new XElement("name", FindStationById(idEnd)))
-                                                                 ));
+                                                                 ),
+                                    new XElement("timeStamp",
+                                                            new XElement("date",
+                                                                new XElement("year", date.Year.ToString()),
+                                                                new XElement("month",
+                                                                    new XElement("name", date.ToString("MMM", CultureInfo.InvariantCulture)),
+                                                                    new XElement("value", date.Month.ToString())),
+                                                                new XElement("day",
+                                                                    new XElement("dayOfWeek",
+                                                                        new XElement("name", date.DayOfWeek.ToString()),
+                                                                        new XElement("value", (int)date.DayOfWeek + 1),
+                                                                        new XElement("isWeekend", isWeekend)),
+                                                                    new XElement("dayOfMonth",
+                                                                        new XElement("value", date.Day.ToString())),
+                                                                    new XElement("dayOfYear",
+                                                                        new XElement("value", date.DayOfYear.ToString())))),
+                                                            new XElement("time",
+                                                                new XElement("hour", date.Hour.ToString()),
+                                                                new XElement("minute", date.Minute.ToString()),
+                                                                new XElement("second", date.Second.ToString()))));
         }
 
         private void XmlAddRow(XDocument xml, int counter)
