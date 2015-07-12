@@ -1,0 +1,105 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" >
+  <xs:element name="root">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="stations">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="from">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:byte" name="id"/>
+                    <xs:element type="xs:string" name="name"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="to">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:byte" name="id"/>
+                    <xs:element type="xs:string" name="name"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="timeStamp">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="date">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:short" name="year"/>
+                    <xs:element name="month">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element type="xs:string" name="name"/>
+                          <xs:element type="xs:byte" name="value"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="day">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="dayOfWeek">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element type="xs:string" name="name"/>
+                                <xs:element type="xs:byte" name="value"/>
+                                <xs:element type="xs:string" name="isWeekend"/>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="dayOfMonth">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element type="xs:byte" name="value"/>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="dayOfYear">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element type="xs:short" name="value"/>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="time">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:byte" name="hour"/>
+                    <xs:element type="xs:byte" name="minute"/>
+                    <xs:element type="xs:byte" name="second"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="row" maxOccurs="unbounded" minOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:byte" name="hourValue"/>
+              <xs:element name="minutesRow" maxOccurs="unbounded" minOccurs="1">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:byte" name="minutesValue"/>
+                    <xs:element type="xs:string" name="minutesTips"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute type="xs:byte" name="id" use="optional"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
